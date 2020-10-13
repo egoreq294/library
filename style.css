@@ -16,9 +16,24 @@ textarea {
   min-height: 250px;
   border: solid #000 2px;
 }
-.book-item__text {
-  cursor: pointer;
-}
 .book-item_active {
   color: red;
+}
+.book-item_read {
+  background-color: cyan;
+}
+.modal {
+  position: fixed;
+  top: 25%;
+  left: 25%;
+  width: 50%;
+  height: 50%;
+  background-color: darkcyan;
+}
+.modal__form {
+  display: flex;
+  flex-direction: column;
+}
+.modal__form * {
+  margin: 10px;
 }
