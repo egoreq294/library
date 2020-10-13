@@ -191,10 +191,17 @@ function rewriteBook(e){
 }
 function saveChanges(id){
     let path;
-    JSON.parse(localStorage.getItem("books")).forEach(item=>{
-        if(+item.id===+id) path = 'books'
-        else path = 'favourite-books'
-    })
+    for(let i = 0; i<JSON.parse(localStorage.getItem("books")).length; i++){
+        console.log(JSON.parse(localStorage.getItem("books"))[i].id === +id)
+        if(JSON.parse(localStorage.getItem("books"))[i].id===+id){
+            path = 'books';
+            break;
+        }
+        else{
+            path = 'favourite-books'
+        }
+    }
+    console.log(path)
     let title = document.querySelector('.modal__input').value;
     let text = document.querySelector('.modal__textarea').value;
     let arrayOfBooks= JSON.parse(localStorage.getItem(path));
