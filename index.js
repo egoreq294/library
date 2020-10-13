@@ -55,8 +55,9 @@ async function addLoadingBookToLocalStorage(){
     return {'title': result.title, 'text': result.text, 'id': id, 'read': false}
 }
 
-function createBookItem(name, id, read){
+function createBookItem(name, id, read, node){
  let div = document.createElement('div');
+ div.setAttribute('draggable','true');
  div.setAttribute("class", "book-item");
  if(read){
      div.setAttribute('class','book-item_read')
@@ -87,18 +88,21 @@ function createBookItem(name, id, read){
  div.appendChild(deleteBookButton);
  div.appendChild(changeBookStatusButton);
  div.appendChild(rewriteBookButton);
- document.querySelector('.book-items').appendChild(div);
+ document.querySelector(`.${node}`).appendChild(div);
 
 }
 
+
 function readBook(e){
+    let path;
+    e.parentNode.parentNode.classList.contains('book-items')?path='books':path='favourite-books';
     e.parentNode.firstChild.classList.add('book-item_active');
     document.querySelectorAll('.book-item__text').forEach(item=>{
         if(item.id!==e.parentNode.firstChild.id){
             item.classList.remove('book-item_active');
         }
     });
-    let arrayOfBooks= JSON.parse(localStorage.getItem("books"));
+    let arrayOfBooks= JSON.parse(localStorage.getItem(path));
     arrayOfBooks.forEach(item=>{
         if(item.id === +e.parentNode.firstChild.id){
             document.querySelector('.right-side').innerHTML = item.text;
@@ -106,18 +110,23 @@ function readBook(e){
     })    
 }
 function deleteBook(e){
+    let path;
+    e.parentNode.parentNode.classList.contains('book-items')?path='books':path='favourite-books';
     e.parentNode.remove();
-    let arrayOfBooks= JSON.parse(localStorage.getItem("books"));
+    let arrayOfBooks= JSON.parse(localStorage.getItem(path));
     for(let i = 0; i<arrayOfBooks.length; i++){
         if(arrayOfBooks[i].id === +e.parentNode.firstChild.id){
             arrayOfBooks.splice(i,1);
         }
     }
-    localStorage.setItem('books', JSON.stringify(arrayOfBooks));
+    localStorage.setItem(path, JSON.stringify(arrayOfBooks));
+    document.querySelector('.right-side').innerHTML='';
     createSortedBookList();
 }
 function changeStatus(e){    
-    let arrayOfBooks= JSON.parse(localStorage.getItem("books"));
+    let path;
+    e.parentNode.parentNode.classList.contains('book-items')?path='books':path='favourite-books';
+    let arrayOfBooks= JSON.parse(localStorage.getItem(path));
     for(let i = 0; i<arrayOfBooks.length; i++){
         if(arrayOfBooks[i].id === +e.parentNode.firstChild.id){
             if(arrayOfBooks[i].read){ 
@@ -131,12 +140,14 @@ function changeStatus(e){
         }
     }
     e.parentNode.classList.toggle('book-item_read');
-    localStorage.setItem('books', JSON.stringify(arrayOfBooks));
+    localStorage.setItem(path, JSON.stringify(arrayOfBooks));
     createSortedBookList();
 }
 function rewriteBook(e){
     let item = {};
-    let arrayOfBooks= JSON.parse(localStorage.getItem("books"));
+    let path;
+    e.parentNode.parentNode.classList.contains('book-items')?path='books':path='favourite-books';
+    let arrayOfBooks= JSON.parse(localStorage.getItem(path));
     for(let i = 0; i<arrayOfBooks.length; i++){
         if(arrayOfBooks[i].id === +e.parentNode.firstChild.id){
             item = arrayOfBooks[i];
@@ -179,18 +190,27 @@ function rewriteBook(e){
     document.querySelector('body').appendChild(div);
 }
 function saveChanges(id){
+    let path;
+    JSON.parse(localStorage.getItem("books")).forEach(item=>{
+        if(+item.id===+id) path = 'books'
+        else path = 'favourite-books'
+    })
     let title = document.querySelector('.modal__input').value;
     let text = document.querySelector('.modal__textarea').value;
-    let arrayOfBooks= JSON.parse(localStorage.getItem("books"));
+    let arrayOfBooks= JSON.parse(localStorage.getItem(path));
     for(let i = 0; i<arrayOfBooks.length; i++){
         if(arrayOfBooks[i].id === +id){
-            arrayOfBooks[i] = {'title': title, "text": text, 'id': id};
+            arrayOfBooks[i] = {'title': title, "text": text, 'id': id, 'read': arrayOfBooks[i].read};
         }
     }
-    localStorage.setItem('books', JSON.stringify(arrayOfBooks));
+    localStorage.setItem(path, JSON.stringify(arrayOfBooks));
     document.querySelector('.book-items').innerHTML='';
+    document.querySelector('.book-favourite').innerHTML='';
     JSON.parse(localStorage.getItem("books")).forEach(item => {
-        createBookItem(item.title, item.id);
+        createBookItem(item.title, item.id, item.read, 'book-items');
+    });
+    JSON.parse(localStorage.getItem("favourite-books")).forEach(item => {
+        createBookItem(item.title, item.id, item.read, 'book-favourite');
     });
 
     document.querySelector('.modal').remove();
@@ -200,16 +220,15 @@ function saveChanges(id){
 function closeModal(){
     document.querySelector('.modal').remove();
 }
-function sortBooks(){
-    let arrayOfBooks= JSON.parse(localStorage.getItem("books"));
+function sortBooks(array, path){
     let readArray=[];
     let nonReadArray=[];
     let renderArray=[];
-    if(arrayOfBooks){
-        arrayOfBooks.sort(function(a, b) {
+    if(array){
+        array.sort(function(a, b) {
             return a.id - b.id;
           });
-        arrayOfBooks.forEach(item=>{
+        array.forEach(item=>{
             
             if(item.read){
                 readArray.push(item);
@@ -219,16 +238,26 @@ function sortBooks(){
             }
         })
         renderArray=[...readArray, ...nonReadArray];
-        localStorage.setItem('books', JSON.stringify(renderArray));
+        localStorage.setItem(`${path}`, JSON.stringify(renderArray));
     }
 }
 function createSortedBookList(){
-    sortBooks();
     document.querySelector('.book-items').innerHTML='';
+    document.querySelector('.book-favourite').innerHTML='';
+    sortBooks(JSON.parse(localStorage.getItem("books")), 'books');
+    sortBooks(JSON.parse(localStorage.getItem("favourite-books")), 'favourite-books');    
     let renderArray = JSON.parse(localStorage.getItem("books"));
+    let renderArrayFavourite = JSON.parse(localStorage.getItem("favourite-books"));
+    if(renderArray!==null){
         renderArray.forEach(item => {
-            createBookItem(item.title, item.id, item.read);
+            createBookItem(item.title, item.id, item.read, 'book-items');
         });
+    }
+    if(renderArrayFavourite!==null){
+        renderArrayFavourite.forEach(item => {
+            createBookItem(item.title, item.id, item.read, 'book-favourite');
+        });
+    }
 }
 
 window.onload = ()=>{
@@ -248,15 +277,79 @@ document.querySelector('.make-book-form').addEventListener('change', ()=>{
 });
 document.querySelector(".make-book-form__written-book-button").addEventListener("click", ()=>{
     let result = addWrittenBookToLocalStorage();
-    createBookItem(result.title, result.id);
+    createBookItem(result.title, result.id, false, 'book-items');
     createSortedBookList();
 });
 document.querySelector(".make-book-form__load-book-button").addEventListener("click", async ()=>{
     let result = await addLoadingBookToLocalStorage();
-    await createBookItem(result.title, result.id);
+    await createBookItem(result.title, result.id, false, 'book-items');
     await createSortedBookList();
 });
+
 document.querySelector(".clear-localStorage").addEventListener("click", ()=>{
     localStorage.clear();
-    document.querySelector('.book-items').innerHTML=''
+    document.querySelector('.book-items').innerHTML='';
+    document.querySelector('.book-favourite').innerHTML='';
+    document.querySelector('.right-side').innerHTML='';
 });
+
+let dragged;
+document.addEventListener("dragstart", function( event ) {
+    //хранит ссылку на перемещаемый элемент
+    dragged = event.target;
+}, false);
+
+document.addEventListener("dragover", function( event ) {
+    event.preventDefault();
+}, false);
+
+
+
+document.addEventListener("drop", function( event ) {
+    event.preventDefault();
+    if ( event.target.className == "book-favourite" && event.target.className !== dragged.parentNode) {
+        let booksArray = JSON.parse(localStorage.getItem("books"));
+        let favouriteBooksArray;
+        if(JSON.parse(localStorage.getItem("favourite-books"))===null){
+            favouriteBooksArray=[];
+        }
+        else{
+            favouriteBooksArray = JSON.parse(localStorage.getItem("favourite-books"));
+        }
+        for(let i = 0; i<booksArray.length; i++){
+            if(booksArray[i].id===+dragged.firstChild.id){
+                favouriteBooksArray.push(booksArray[i]);
+                booksArray.splice(i,1);
+            }
+        }
+        dragged.parentNode.removeChild( dragged );
+        event.target.appendChild( dragged );
+        localStorage.setItem('books', JSON.stringify(booksArray));
+        localStorage.setItem('favourite-books', JSON.stringify(favouriteBooksArray));
+        createSortedBookList();
+        document.querySelector('.right-side').innerHTML='';
+    }
+
+    if ( event.target.className == "book-items" && event.target.className !== dragged.parentNode) {
+        let favouriteBooksArray = JSON.parse(localStorage.getItem("favourite-books"));
+        let booksArray;
+        if(JSON.parse(localStorage.getItem("favourite-books"))===null){
+            booksArray=[];
+        }
+        else{
+            booksArray = JSON.parse(localStorage.getItem("books"));
+        }
+        for(let i = 0; i<favouriteBooksArray.length; i++){
+            if(favouriteBooksArray[i].id===+dragged.firstChild.id){
+                booksArray.push(favouriteBooksArray[i]);
+                favouriteBooksArray.splice(i,1);
+            }
+        }
+        dragged.parentNode.removeChild( dragged );
+        event.target.appendChild( dragged );
+        localStorage.setItem('books', JSON.stringify(booksArray));
+        localStorage.setItem('favourite-books', JSON.stringify(favouriteBooksArray));
+        createSortedBookList();
+        document.querySelector('.right-side').innerHTML='';
+    }  
+}, false);

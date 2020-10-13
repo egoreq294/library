@@ -8,8 +8,11 @@ textarea {
 .display_none {
   display: none;
 }
-.book-items {
+.book-items,
+.book-favourite {
   border: solid #000 2px;
+  min-width: 150px;
+  min-height: 150px;
 }
 .right-side {
   width: 70%;
