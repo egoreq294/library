@@ -1,0 +1,24 @@
+body {
+  display: flex;
+  justify-content: space-around;
+}
+textarea {
+  resize: none;
+}
+.display_none {
+  display: none;
+}
+.book-items {
+  border: solid #000 2px;
+}
+.right-side {
+  width: 70%;
+  min-height: 250px;
+  border: solid #000 2px;
+}
+.book-item__text {
+  cursor: pointer;
+}
+.book-item_active {
+  color: red;
+}

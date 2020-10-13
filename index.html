@@ -7,6 +7,30 @@
     <title>Library</title>
 </head>
 <body>
-    <script src="index.js"></script>
+    <div class="left-side">
+        <form class="make-book-form">
+            <input class="make-book-form__input" type="radio" name="choose-type-of-loading-file" value="write" checked>Написать самому<Br>
+            <input class="make-book-form__input" type="radio" name="choose-type-of-loading-file" value="load">Загрузить из файла<Br>
+        </form> 
+        <div class="make-book-form__load-book display_none">
+            <form>
+                <input class="make-book-form__load-book-file" type="file" name="book-file" accept=".txt">
+                <input class="make-book-form__load-book-button" type="button" value="Загрузить">
+            </form>
+        </div>
+        <div class="make-book-form__wright-book">
+            <form>
+                <input class="make-book-form__written-book-name" type="text" name="book-name"><br>
+                <textarea class="make-book-form__written-book-text" name="book-text" cols="30" rows="10"></textarea><br>
+                <input class="make-book-form__written-book-button" type="button" value="Загрузить">
+            </form>
+        </div>
+        <div class="book-items">
+            
+        </div>
+        <button class="clear-localStorage">Очистить</button>
+    </div>
+    <div class="right-side"></div>
+<script src="index.js"></script>
 </body>
 </html>
