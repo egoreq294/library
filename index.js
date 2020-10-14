@@ -45,12 +45,14 @@ async function getDataFromFile(){
 async function addLoadingBookToLocalStorage(){
     let result = await getDataFromFile();    
     let id = Date.now();
+    if(!result.title.replace(/\.[^.]+$/, "")) result.title = `Книга без названия, ее id: ${id}`;
     setToLocalStorage(result.title.replace(/\.[^.]+$/, ""), result.text, id, false);
     return {'title': result.title.replace(/\.[^.]+$/, ""), 'text': result.text, 'id': id, 'read': false}
 }
  function addWrittenBookToLocalStorage(){
     let result = getDataFromInput();
-    let id = Date.now();
+    let id = Date.now();    
+    if(!result.title) result.title = `Книга без названия, ее id: ${id}`;
     setToLocalStorage(result.title, result.text, id, false);
     return {'title': result.title, 'text': result.text, 'id': id, 'read': false}
 }
